@@ -1,7 +1,7 @@
 """
 streamlit_app.py
 ────────────────
-Entry point — ML Development Lifecycle App: klasifikasi Diabetes
+Entry point — CRISP-DM App: Klasifikasi Diabetes Melitus
 Struktur mengikuti skill: developing-with-streamlit
   • st.navigation() dengan app_pages/ (posisi sidebar)
   • Model & data diinisialisasi sekali ke st.session_state
@@ -53,8 +53,8 @@ if "preprocessed" not in st.session_state:
 
 # ── Shared Sidebar Branding ───────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🩺 DiabetesPredict")
-    st.caption("Logistic Regression · ML App")
+    st.markdown("### 🩺 DiabetesKlasifikasi")
+    st.caption("Logistic Regression · CRISP-DM")
     st.divider()
     st.markdown(f"""
     **Dataset**

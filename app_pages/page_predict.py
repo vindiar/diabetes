@@ -1,12 +1,14 @@
 """
 app_pages/page_predict.py
 ─────────────────────────
-ML Lifecycle Phase 4 — PREDICTION (Serving)
-Interactive single-patient prediction form.
+CRISP-DM Fase 6 — DEPLOYMENT (Serving)
+Interactive single-patient classification form with PDF export.
 """
 
+import io
 import streamlit as st
 import matplotlib.pyplot as plt
+from datetime import datetime
 from utils.model import predict_single
 from utils import plots
 
@@ -15,8 +17,8 @@ model     = st.session_state.model
 scaler    = st.session_state.scaler
 features  = st.session_state.features
 
-st.markdown("## 🔍 klasifikasi Risiko Diabetes")
-st.caption("Masukkan data pasien lalu klik **klasifikasi Sekarang**.")
+st.markdown("## 🔍 Klasifikasi Risiko Diabetes")
+st.caption("Masukkan data pasien lalu klik **Klasifikasi Sekarang**.")
 st.divider()
 
 col_form, col_result = st.columns([1, 1], gap="large")
@@ -35,14 +37,14 @@ with col_form:
         age = st.number_input(
             "🎂 Usia (tahun)", min_value=1, max_value=120, value=35, step=1
         )
-        
+
         st.markdown("⚖️ **Body Mass Index (BMI)**")
         c_bb, c_tb = st.columns(2)
         with c_bb:
             berat_badan = st.number_input("Berat Badan (Kg)", min_value=10.0, max_value=300.0, value=75.0, step=0.1, format="%.1f")
         with c_tb:
             tinggi_badan = st.number_input("Tinggi Badan (m)", min_value=0.5, max_value=3.0, value=1.65, step=0.01, format="%.2f")
-            
+
         bmi = berat_badan / (tinggi_badan * tinggi_badan)
         st.caption(f"Hasil otomatis BMI: **{bmi:.1f}**")
 
@@ -82,19 +84,19 @@ with col_form:
         smoking = smoking_options[smoking_label]
 
         submitted = st.form_submit_button(
-            "🔍 klasifikasi Sekarang", width='stretch'
+            "🔍 Klasifikasi Sekarang", width='stretch'
         )
 
 # ── Result Panel ──────────────────────────────────────────────────────────
 with col_result:
-    st.markdown("#### 📊 Hasil klasifikasi")
+    st.markdown("#### 📊 Hasil Klasifikasi")
 
     if not submitted:
         st.markdown("""
         <div style="text-align:center;padding:60px 20px;color:#64748b;">
           <div style="font-size:4rem;">🩺</div>
           <div style="font-size:1rem;margin-top:12px;">
-            Isi form pasien di sebelah kiri<br>dan klik <b>klasifikasi Sekarang</b>
+            Isi form pasien di sebelah kiri<br>dan klik <b>Klasifikasi Sekarang</b>
           </div>
         </div>""", unsafe_allow_html=True)
         st.stop()
@@ -194,3 +196,210 @@ with col_result:
             "Pertahankan gaya hidup sehat! Tetap jaga pola makan dan olahraga rutin.",
             icon="🎉",
         )
+
+    # ── PDF Export ────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### 🖨️ Ekspor Laporan")
+
+    def _generate_pdf(
+        gender_label, age_val, bb_val, tb_val, bmi_val, bmi_cat_val,
+        hba1c_val, hba1c_status_val, glucose_val, glucose_status_val,
+        hypertension_val, heart_val, smoking_label_val,
+        pred_val, prob_diabetes_val, prob_no_diabetes_val
+    ):
+        """Generate PDF report using fpdf2 and return bytes."""
+        try:
+            from fpdf import FPDF
+        except ImportError:
+            return None
+
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+
+        # ── Header ────────────────────────────────────────────────────────
+        pdf.set_fill_color(88, 28, 135)   # purple-900
+        pdf.rect(0, 0, 210, 30, 'F')
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font("Helvetica", "B", 18)
+        pdf.set_xy(10, 8)
+        pdf.cell(0, 10, "LAPORAN KLASIFIKASI RISIKO DIABETES", ln=True)
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_xy(10, 20)
+        pdf.cell(0, 6, "DiabetesKlasifikasi | Logistic Regression | CRISP-DM", ln=True)
+
+        pdf.set_text_color(30, 30, 30)
+        pdf.set_y(36)
+
+        # ── Timestamp ─────────────────────────────────────────────────────
+        now = datetime.now().strftime("%d %B %Y, %H:%M WIB")
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(100, 100, 100)
+        pdf.cell(0, 6, f"Dicetak pada: {now}", ln=True, align="R")
+        pdf.ln(2)
+
+        # ── Hasil Klasifikasi ──────────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 8, "HASIL KLASIFIKASI", ln=True)
+        pdf.set_draw_color(139, 92, 246)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+
+        if pred_val == 1:
+            pdf.set_fill_color(254, 226, 226)   # red-100
+            pdf.set_text_color(185, 28, 28)       # red-700
+            verdict = "TERINDIKASI DIABETES"
+            prob_text = f"Probabilitas Diabetes: {prob_diabetes_val:.1f}%"
+        else:
+            pdf.set_fill_color(220, 252, 231)   # green-100
+            pdf.set_text_color(21, 128, 61)       # green-700
+            verdict = "TIDAK TERINDIKASI DIABETES"
+            prob_text = f"Probabilitas Tidak Diabetes: {prob_no_diabetes_val:.1f}%"
+
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 12, verdict, ln=True, align="C", fill=True)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 8, prob_text, ln=True, align="C")
+        pdf.ln(4)
+
+        # ── Data Pasien ────────────────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 8, "DATA PASIEN", ln=True)
+        pdf.set_draw_color(139, 92, 246)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+
+        rows = [
+            ("Jenis Kelamin", gender_label),
+            ("Usia", f"{age_val} tahun"),
+            ("Berat Badan", f"{bb_val:.1f} kg"),
+            ("Tinggi Badan", f"{tb_val:.2f} m"),
+            ("Riwayat Merokok", smoking_label_val),
+            ("Hipertensi", "Ya" if hypertension_val else "Tidak"),
+            ("Penyakit Jantung", "Ya" if heart_val else "Tidak"),
+        ]
+        pdf.set_font("Helvetica", "", 10)
+        fill = False
+        pdf.set_fill_color(245, 243, 255)  # purple-50
+        for label, val in rows:
+            pdf.set_fill_color(245, 243, 255) if fill else pdf.set_fill_color(255, 255, 255)
+            pdf.cell(80, 8, label, border=1, fill=fill)
+            pdf.cell(0, 8, val, border=1, fill=fill, ln=True)
+            fill = not fill
+        pdf.ln(4)
+
+        # ── Faktor Risiko Klinis ───────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 8, "FAKTOR RISIKO KLINIS", ln=True)
+        pdf.set_draw_color(139, 92, 246)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+
+        risk_rows = [
+            ("BMI", f"{bmi_val:.1f} kg/m2", bmi_cat_val),
+            ("HbA1c Level", f"{hba1c_val:.1f}%", hba1c_status_val.replace("⚠️ ", "").replace("✅ ", "")),
+            ("Kadar Gula Darah", f"{glucose_val} mg/dL", glucose_status_val.replace("⚠️ ", "").replace("✅ ", "")),
+        ]
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_fill_color(88, 28, 135)
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(60, 8, "Parameter", border=1, fill=True)
+        pdf.cell(60, 8, "Nilai", border=1, fill=True)
+        pdf.cell(0, 8, "Status Klinis", border=1, fill=True, ln=True)
+
+        pdf.set_font("Helvetica", "", 10)
+        fill = False
+        for param, val, status in risk_rows:
+            pdf.set_fill_color(245, 243, 255) if fill else pdf.set_fill_color(255, 255, 255)
+            pdf.set_text_color(30, 30, 30)
+            pdf.cell(60, 8, param, border=1, fill=fill)
+            pdf.cell(60, 8, val, border=1, fill=fill)
+            pdf.cell(0, 8, status, border=1, fill=fill, ln=True)
+            fill = not fill
+        pdf.ln(4)
+
+        # ── Distribusi Probabilitas ────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(0, 8, "DISTRIBUSI PROBABILITAS", ln=True)
+        pdf.set_draw_color(139, 92, 246)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+
+        pdf.set_font("Helvetica", "", 10)
+        # Draw simple bar chart inline
+        bar_y = pdf.get_y()
+        # Non-diabetes bar (green)
+        bar_w_nd = (prob_no_diabetes_val / 100) * 150
+        pdf.set_fill_color(34, 197, 94)
+        pdf.rect(30, bar_y, bar_w_nd, 8, 'F')
+        pdf.set_xy(10, bar_y)
+        pdf.cell(20, 8, "Normal")
+        pdf.set_xy(185, bar_y)
+        pdf.cell(0, 8, f"{prob_no_diabetes_val:.1f}%", ln=True)
+
+        bar_y2 = pdf.get_y() + 2
+        # Diabetes bar (red)
+        bar_w_d = (prob_diabetes_val / 100) * 150
+        pdf.set_fill_color(239, 68, 68)
+        pdf.rect(30, bar_y2, bar_w_d, 8, 'F')
+        pdf.set_xy(10, bar_y2)
+        pdf.cell(20, 8, "Diabetes")
+        pdf.set_xy(185, bar_y2)
+        pdf.cell(0, 8, f"{prob_diabetes_val:.1f}%", ln=True)
+        pdf.ln(8)
+
+        # ── Disclaimer ─────────────────────────────────────────────────────
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_text_color(100, 100, 100)
+        pdf.set_fill_color(254, 249, 195)  # yellow-100
+        pdf.cell(0, 6, "DISCLAIMER MEDIS", ln=True, fill=True)
+        pdf.set_font("Helvetica", "", 8)
+        disclaimer = (
+            "Laporan ini dihasilkan oleh sistem klasifikasi berbasis Machine Learning "
+            "dan bersifat INDIKATIF, BUKAN merupakan diagnosis medis resmi. "
+            "Hasil ini tidak menggantikan pemeriksaan dan diagnosis oleh dokter atau tenaga medis "
+            "berpengalaman. Untuk konfirmasi diagnosis, segera konsultasikan dengan dokter profesional."
+        )
+        pdf.multi_cell(0, 5, disclaimer)
+
+        return bytes(pdf.output())
+
+    # Build PDF and show download button
+    pdf_bytes = _generate_pdf(
+        gender_label=gender,
+        age_val=age,
+        bb_val=berat_badan,
+        tb_val=tinggi_badan,
+        bmi_val=bmi,
+        bmi_cat_val=bmi_cat,
+        hba1c_val=hba1c,
+        hba1c_status_val=hba1c_status,
+        glucose_val=glucose,
+        glucose_status_val=glucose_status,
+        hypertension_val=hypertension,
+        heart_val=heart_disease,
+        smoking_label_val=smoking_label,
+        pred_val=prediction,
+        prob_diabetes_val=prob_diabetes,
+        prob_no_diabetes_val=prob_no_diabetes,
+    )
+
+    if pdf_bytes:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"laporan_klasifikasi_diabetes_{ts}.pdf"
+        st.download_button(
+            label="📄 Unduh Laporan PDF",
+            data=pdf_bytes,
+            file_name=filename,
+            mime="application/pdf",
+            use_container_width=True,
+            type="primary",
+        )
+        st.caption("Laporan PDF berisi hasil klasifikasi, data pasien, faktor risiko, dan disclaimer medis.")
+    else:
+        st.info("Install `fpdf2` untuk mengaktifkan fitur ekspor PDF: `pip install fpdf2`", icon="ℹ️")

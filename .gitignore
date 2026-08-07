@@ -1,0 +1,56 @@
+# --- Agents / AI Tools ---
+.agents/
+.agent/
+_agents/
+_agent/
+skills-lock.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# --- Virtual Environment ---
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE & Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Streamlit Cache ---
+.streamlit/secrets.toml
+
+# --- Logs & Temp ---
+*.log
+tmp/
+temp/
+
+# --- Archive (old versions) ---
+archive/
