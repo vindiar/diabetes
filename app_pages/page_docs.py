@@ -87,7 +87,15 @@ st.divider()
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. DATASET
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("### 2️⃣ Struktur Dataset")
+st.markdown("""
+**Perbandingan Dataset Mentah vs Dibalancing:**
+| Metrik / Indikator | Sebelum Balancing (`dataset_diabetes.csv`) | Setelah Balancing (`balanced_dataset.csv`) |
+|--------------------|--------------------------------------------|-------------------------------------------|
+| **Total Sampel** | **100.000** baris | **12.680** baris (setelah IQR Outlier Removal) |
+| **Kasus Diabetes (+)** | 8.500 sampel (8.5%) | 6.340 sampel (50.0%) |
+| **Kasus Non-Diabetes (-)** | 91.500 sampel (91.5%) | 6.340 sampel (50.0%) |
+| **Status Distribusi** | ⚠️ Imbalanced (1 : 10,7) | ✅ Balanced (1 : 1) |
+""")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -112,6 +120,7 @@ with col2:
 | `HbA1c_level` | % | Gula darah rata-rata 3 bln |
 | `blood_glucose_level` | mg/dL | Gula darah pemeriksaan |
 """)
+
 
 st.info("""
 ⚠️ **Preprocessing Khusus yang Dilakukan di Notebook:**

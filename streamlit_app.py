@@ -10,7 +10,7 @@ Struktur mengikuti skill: developing-with-streamlit
 
 import os
 import streamlit as st
-from utils.data import load_dataset
+from utils.data import load_dataset, load_raw_dataset
 from utils.model import load_artifacts, evaluate_model, MODEL_PATH
 
 # ── Page Config ───────────────────────────────────────────────────────────────
@@ -35,9 +35,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 """, unsafe_allow_html=True)
 
 # ── Session State: Initialize Once ───────────────────────────────────────────
-# Load dataset
+# Load datasets
 if "df" not in st.session_state:
     st.session_state.df = load_dataset()
+
+if "df_raw" not in st.session_state:
+    st.session_state.df_raw = load_raw_dataset()
 
 # Load models and evaluate
 if "preprocessed" not in st.session_state:

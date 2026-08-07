@@ -8,6 +8,13 @@ import pandas as pd
 import streamlit as st
 
 DATASET_PATH = "data/balanced_dataset.csv"
+RAW_DATASET_PATH = "data/dataset_diabetes.csv"
+
+@st.cache_data(show_spinner=False)
+def load_raw_dataset() -> pd.DataFrame:
+    """Load original raw dataset before balancing."""
+    df_raw = pd.read_csv(RAW_DATASET_PATH)
+    return df_raw
 
 @st.cache_data(show_spinner=False)
 def load_dataset() -> pd.DataFrame:
