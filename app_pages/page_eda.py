@@ -24,6 +24,29 @@ def _card(value, label):
     </div>"""
 
 
+def _overview_card(icon, title, content, badge_color="#8b5cf6"):
+    """Render sebuah kartu informasi overview di dashboard."""
+    return f"""
+    <div style="
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(139,92,246,0.22);
+        border-top: 3px solid {badge_color};
+        border-radius: 16px;
+        padding: 20px 18px;
+        height: 100%;
+        box-sizing: border-box;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    ">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:1.6rem;">{icon}</span>
+            <div style="font-weight:700;color:#e2e8f0;font-size:1.02rem;line-height:1.3;">{title}</div>
+        </div>
+        <div style="font-size:0.86rem;color:#cbd5e1;line-height:1.65;text-align:justify;">
+            {content}
+        </div>
+    </div>"""
+
+
 def _var_card(icon, title, tipe, deskripsi, badge_color="#3b82f6"):
     """Render sebuah kartu penjelasan variabel."""
     return f"""
@@ -54,7 +77,39 @@ st.markdown("## 🏠 Dashboard & Eksplorasi Data")
 st.caption(f"Dataset: `data/balanced_dataset.csv` — **{len(df):,}** baris, 12 fitur")
 st.divider()
 
-# ── Metric cards ──────────────────────────────────────────────────────────
+# ── 1. Overview Dashboard (3 Kolom Proporsional) ────────────────────────
+st.markdown(CSS_SECTION.format("📌 Informasi & Konteks Aplikasi"), unsafe_allow_html=True)
+
+col_ov1, col_ov2, col_ov3 = st.columns(3, gap="medium")
+
+with col_ov1:
+    st.markdown(_overview_card(
+        icon="🩺",
+        title="Mengenal Diabetes Melitus",
+        content="""Diabetes melitus merupakan penyakit gangguan metabolik menahun yang ditandai dengan tingginya kadar gula di dalam darah. Kondisi ini memerlukan penanganan dan deteksi dini untuk mencegah komplikasi yang lebih serius. Secara klinis, seseorang umumnya didiagnosis memiliki indikasi diabetes apabila hasil pemeriksaan kadar gula darah sewaktu mencapai <b>≥ 200 mg/dL</b> atau kadar gula darah puasa <b>≥ 126 mg/dL</b>.""",
+        badge_color="#ef4444"
+    ), unsafe_allow_html=True)
+
+with col_ov2:
+    st.markdown(_overview_card(
+        icon="🤖",
+        title="Peran Machine Learning",
+        content="""Machine Learning adalah cabang dari kecerdasan buatan (AI) yang memungkinkan sistem komputer untuk belajar dari pola data historis tanpa perlu diprogram secara eksplisit. Sistem ini secara spesifik menerapkan algoritma <b>Logistic Regression</b>, yaitu metode klasifikasi prediktif yang sangat andal untuk mengklasifikasikan keluaran biner (seperti kelas 'Terindikasi Diabetes' atau 'Normal') berdasarkan evaluasi bobot dari berbagai fitur klinis pasien.""",
+        badge_color="#8b5cf6"
+    ), unsafe_allow_html=True)
+
+with col_ov3:
+    st.markdown(_overview_card(
+        icon="📱",
+        title="Tentang Aplikasi Ini",
+        content="""Aplikasi web ini dibangun menggunakan kerangka kerja Streamlit sebagai instrumen alat bantu skrining kesehatan. Dengan memasukkan parameter medis seperti umur, indeks massa tubuh (BMI), kadar HbA1c, hingga glukosa darah, sistem akan memproses data tersebut menggunakan model yang telah dievaluasi untuk menampilkan probabilitas risiko diabetes secara seketika <i>(real-time)</i>. Aplikasi ini dirancang untuk kemudahan akses masyarakat awam, namun <b>tidak ditujukan sebagai pengganti vonis diagnosis resmi dari dokter profesional</b>.""",
+        badge_color="#3b82f6"
+    ), unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── 2. Metric cards ────────────────────────────────────────────────────────
+st.markdown(CSS_SECTION.format("📊 Ringkasan Dataset"), unsafe_allow_html=True)
 total = len(df)
 positif = int(df["diabetes"].sum())
 negatif = total - positif
@@ -68,8 +123,8 @@ with c4: st.markdown(_card(f"{prevalensi:.1f}%", "Prevalensi"), unsafe_allow_htm
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Penjelasan Variabel Dataset ──────────────────────────────────────────
-st.markdown(CSS_SECTION.format("📋 Penjelasan Variabel Dataset"), unsafe_allow_html=True)
+# ── 3. Penjelasan Variabel Dataset ──────────────────────────────────────────
+st.markdown(CSS_SECTION.format("📋 Penjelasan Fitur Klinis Dataset"), unsafe_allow_html=True)
 st.caption("Deskripsi lengkap setiap fitur klinis yang digunakan dalam model klasifikasi diabetes.")
 
 # Baris 1 — 4 variabel pertama
@@ -169,7 +224,7 @@ with st.expander("🔍 Tabel Ringkasan Variabel", expanded=False):
 
 st.divider()
 
-# ── Static EDA Images ───────────────────────────────────────────────────
+# ── 4. Static EDA Images ───────────────────────────────────────────────────
 
 st.markdown(CSS_SECTION.format("Missing Value Matrix"), unsafe_allow_html=True)
 st.image("results/1_missing_value.png", width='stretch')
