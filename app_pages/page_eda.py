@@ -13,15 +13,17 @@ CSS_SECTION = """
             margin-bottom:16px;">{}</div>
 """
 
-def _card(value, label, sublabel=""):
-    sub_html = f'<div style="font-size:0.75rem;color:#a78bfa;margin-top:2px;">{sublabel}</div>' if sublabel else ''
+def _card(value, label, sublabel="", font_size="1.75rem"):
+    sub_html = f'<div style="font-size:0.75rem;color:#a78bfa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{sublabel}</div>' if sublabel else ''
     return f"""
     <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(139,92,246,0.3);
-                border-radius:16px;padding:20px 16px;text-align:center;backdrop-filter:blur(10px);">
-      <div style="font-size:2rem;font-weight:800;background:linear-gradient(90deg,#a78bfa,#60a5fa);
-                  -webkit-background-clip:text;-webkit-text-fill-color:transparent;">{value}</div>
+                border-radius:14px;padding:16px 12px;text-align:center;backdrop-filter:blur(10px);
+                box-sizing:border-box;">
+      <div style="font-size:{font_size};font-weight:800;background:linear-gradient(90deg,#a78bfa,#60a5fa);
+                  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{value}</div>
       <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px;
-                  text-transform:uppercase;letter-spacing:1px;">{label}</div>
+                  text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{label}</div>
       {sub_html}
     </div>"""
 
@@ -128,7 +130,7 @@ if df_raw is not None:
 else:
     total_raw, pos_raw, neg_raw, prev_raw = 100000, 8500, 91500, 8.5
 
-tab_comp1, tab_comp2 = st.tabs(["📊 Tabel & Kartu Perbandingan", "💡 Alasan & Efek Resampling"])
+tab_comp1, tab_comp2 = st.tabs(["📊 Perbandingan Metrik & Statistik", "💡 Alasan & Efek Resampling"])
 
 with tab_comp1:
     col_raw_box, col_bal_box = st.columns(2, gap="medium")
@@ -136,38 +138,48 @@ with tab_comp1:
     with col_raw_box:
         st.markdown("""
         <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.3);
-                    border-radius:14px;padding:16px;margin-bottom:12px;">
+                    border-radius:14px;padding:14px 16px;margin-bottom:12px;">
           <div style="font-weight:700;color:#f87171;font-size:1.05rem;">🔴 Sebelum Balancing (Data Mentah)</div>
           <div style="font-size:0.8rem;color:#94a3b8;">File: <code>data/dataset_diabetes.csv</code> (Imbalanced)</div>
         </div>""", unsafe_allow_html=True)
 
-        c1, c2, c3, c4 = st.columns(4)
-        with c1: st.markdown(_card(f"{total_raw:,}", "Total Data"), unsafe_allow_html=True)
-        with c2: st.markdown(_card(f"{pos_raw:,}", "Diabetes (+)"), unsafe_allow_html=True)
-        with c3: st.markdown(_card(f"{neg_raw:,}", "Non-Diabetes (-)"), unsafe_allow_html=True)
-        with c4: st.markdown(_card(f"{prev_raw:.1f}%", "Prevalensi", "Bias Tinggi (1 : 11)"), unsafe_allow_html=True)
+        r1c1, r1c2 = st.columns(2, gap="small")
+        with r1c1: st.markdown(_card(f"{total_raw:,}", "Total Data"), unsafe_allow_html=True)
+        with r1c2: st.markdown(_card(f"{prev_raw:.1f}%", "Prevalensi", "Bias (1 : 11)"), unsafe_allow_html=True)
+
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+        r2c1, r2c2 = st.columns(2, gap="small")
+        with r2c1: st.markdown(_card(f"{pos_raw:,}", "Diabetes (+)"), unsafe_allow_html=True)
+        with r2c2: st.markdown(_card(f"{neg_raw:,}", "Non-Diabetes (-)"), unsafe_allow_html=True)
 
     with col_bal_box:
         st.markdown("""
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.3);
-                    border-radius:14px;padding:16px;margin-bottom:12px;">
+                    border-radius:14px;padding:14px 16px;margin-bottom:12px;">
           <div style="font-weight:700;color:#4ade80;font-size:1.05rem;">🟢 Setelah Balancing & Preprocessing</div>
           <div style="font-size:0.8rem;color:#94a3b8;">File: <code>data/balanced_dataset.csv</code> (IQR Cleaned + Balanced)</div>
         </div>""", unsafe_allow_html=True)
 
-        c1, c2, c3, c4 = st.columns(4)
-        with c1: st.markdown(_card(f"{total_bal:,}", "Total Data"), unsafe_allow_html=True)
-        with c2: st.markdown(_card(f"{pos_bal:,}", "Diabetes (+)"), unsafe_allow_html=True)
-        with c3: st.markdown(_card(f"{neg_bal:,}", "Non-Diabetes (-)"), unsafe_allow_html=True)
-        with c4: st.markdown(_card(f"{prev_bal:.1f}%", "Prevalensi", "Ideal (1 : 1)"), unsafe_allow_html=True)
+        r1c1, r1c2 = st.columns(2, gap="small")
+        with r1c1: st.markdown(_card(f"{total_bal:,}", "Total Data"), unsafe_allow_html=True)
+        with r1c2: st.markdown(_card(f"{prev_bal:.1f}%", "Prevalensi", "Ideal (1 : 1)"), unsafe_allow_html=True)
+
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+        r2c1, r2c2 = st.columns(2, gap="small")
+        with r2c1: st.markdown(_card(f"{pos_bal:,}", "Diabetes (+)"), unsafe_allow_html=True)
+        with r2c2: st.markdown(_card(f"{neg_bal:,}", "Non-Diabetes (-)"), unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("""
 | Indikator | Sebelum Balancing (Raw) | Sesudah Balancing & Preprocessing | Implikasi Klinis / ML |
 |-----------|-------------------------|-----------------------------------|-----------------------|
 | **File CSV** | `data/dataset_diabetes.csv` | `data/balanced_dataset.csv` | Sumber dataset utama |
-| **Jumlah Baris** | **100.000** sampel | **12.680** sampel | Outlier IQR dibuang + Under-sampling |
-| **Kelas Diabetes (+)** | 8.500 sampel (8.5%) | 6.340 sampel (50.0%) | Proporsi kelas positif dijaga |
-| **Kelas Non-Diabetes (-)** | 91.500 sampel (91.5%) | 6.340 sampel (50.0%) | Mengurangi bias ke kelas mayoritas |
+| **Jumlah Baris** | **100,000** sampel | **12,680** sampel | Outlier IQR dibuang + Under-sampling |
+| **Kelas Diabetes (+)** | 8,500 sampel (8.5%) | 6,340 sampel (50.0%) | Proporsi kelas positif dijaga |
+| **Kelas Non-Diabetes (-)** | 91,500 sampel (91.5%) | 6,340 sampel (50.0%) | Mengurangi bias ke kelas mayoritas |
 | **Rasio Kelas (+ : -)** | **1 : 10.7 (Sangat Imbalanced)** | **1 : 1 (Ideal / Balanced)** | Menjamin evaluasi F1-Score & Sensitivity adil |
 """)
 
@@ -178,7 +190,7 @@ with tab_comp2:
 - **Masalah Imbalanced Data**: Pada dataset asli (`dataset_diabetes.csv`), 91.5% pasien berlabel Non-Diabetes dan hanya 8.5% Diabetes. Jika model langsung dilatih pada data ini, model cenderung terbias untuk selalu menebak **"Non-Diabetes"** dan tetap mendapatkan akurasi 91.5% — namun gagal mendeteksi pasien yang benar-benar sakit *(High False Negative Rate)*.
 - **Solusi Resampling & IQR Filtering**: 
   1. Fitur numerik (BMI, HbA1c, Glukosa) dibersihkan dari pencilan (*outliers*) menggunakan batas **IQR (Q1 - 1.5×IQR s/d Q3 + 1.5×IQR)**.
-  2. Dataset diseimbangkan (*Under-sampling*) menjadi proporsi **50% Diabetes : 50% Non-Diabetes** (total 12.680 baris) agar model belajar membedakan fitur kedua kelas secara adil.
+  2. Dataset diseimbangkan (*Under-sampling*) menjadi proporsi **50% Diabetes : 50% Non-Diabetes** (total 12,680 baris) agar model belajar membedakan fitur kedua kelas secara adil.
 """, icon="💡")
 
 st.markdown("<br>", unsafe_allow_html=True)
