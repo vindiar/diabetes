@@ -186,7 +186,7 @@ predict-diabetes/
 └── app_pages/                # Halaman UI Streamlit (frontend)
     ├── page_eda.py           # Dashboard & EDA (menampilkan gambar dari results/)
     ├── page_model.py         # Performa Model (menampilkan gambar dari results/)
-    ├── page_predict.py       # Form klasifikasi
+    ├── page_klasifikasi.py   # Form klasifikasi
     └── page_docs.py          # Dokumentasi
 ```
 
@@ -210,8 +210,8 @@ Aplikasi ini mengimplementasikan 4 fase standar ML lifecycle:
 │  Akurasi, Presisi, Recall│  app_pages/page_model.py     │
 │  F1, AUC-ROC (Static EDA)│  Menggunakan Stratified KFold│
 ├─────────────────────────────────────────────────────────┤
-│  Fase 4 — klasifikasi       │  utils/model.py              │
-│  Single-patient inference│  app_pages/page_predict.py   │
+│  Fase 4 — Klasifikasi    │  utils/model.py              │
+│  Single-patient inference│  app_pages/page_klasifikasi.py│
 │  (One-Hot map format)    │                              │
 └─────────────────────────────────────────────────────────┘
 ```

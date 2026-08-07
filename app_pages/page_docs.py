@@ -455,13 +455,13 @@ klasifikasi-diabetes/
 └── app_pages/                # Halaman UI Streamlit (frontend)
     ├── page_eda.py           # Dashboard & EDA (akses results/)
     ├── page_model.py         # Performa Model (akses results/)
-    ├── page_predict.py       # Form Klasifikasi
+    ├── page_klasifikasi.py   # Form Klasifikasi
     └── page_docs.py          # Dokumentasi Ini
 """, language="text")
 
 st.info("""
 **Pemisahan Infrastruktur Statik & Dinamis**
-Aplikasi menggunakan metode cerdas di mana bagian kalkulasi evaluasi grafikal tidak dilakukan *On the Fly*. Hanya fungsi klasifikasi risiko individu (*page_predict*) yang meregulasi probabilitas instan.
+Aplikasi menggunakan metode cerdas di mana bagian kalkulasi evaluasi grafikal tidak dilakukan *On the Fly*. Hanya fungsi klasifikasi risiko individu (*page_klasifikasi*) yang meregulasi probabilitas instan.
 """, icon="🏗️")
 
 st.divider()

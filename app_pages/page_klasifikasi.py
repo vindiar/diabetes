@@ -1,6 +1,6 @@
 """
-app_pages/page_predict.py
-─────────────────────────
+app_pages/page_klasifikasi.py
+───────────────────────────
 CRISP-DM Fase 6 — DEPLOYMENT (Serving)
 Interactive single-patient classification form with placeholders & PDF export.
 """
